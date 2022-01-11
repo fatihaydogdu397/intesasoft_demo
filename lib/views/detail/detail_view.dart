@@ -57,9 +57,9 @@ class _DetailViewState extends State<DetailView> {
                       children: [
                         AutoSizeText(
                           // ignore: unnecessary_null_comparison
-                          model.detailModel!.name != null ||
-                                  model.detailModel!.name != ''
-                              ? model.detailModel!.name
+                          provider.detailModel?.name != null ||
+                                  provider.detailModel?.name != ''
+                              ? provider.detailModel!.name
                               : "İl Adı",
                           style: context.headline1
                               .copyWith(color: customGreyTextColor),
