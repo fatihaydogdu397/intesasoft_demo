@@ -26,57 +26,49 @@ class _QRPageState extends State<QRPage> {
   _QRPageState();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(70),
-        child: CustomAppbar(),
-      ),
-      drawer: const CustomDrawer(),
-      body: Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: context.mediumSymmetric,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.qr_code_scanner,
-                    size: 50,
+    return Center(
+      child: Column(
+        children: [
+          Padding(
+            padding: context.mediumSymmetric,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.qr_code_scanner,
+                  size: 50,
+                ),
+                AutoSizeText(
+                  "QR OKUT",
+                  style: context.headline3.copyWith(
+                    color: customBlack,
                   ),
-                  AutoSizeText(
-                    "QR OKUT",
-                    style: context.headline3.copyWith(
-                      color: customBlack,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            SizedBox(
-              height: context.height * 70,
-              width: context.width * 80,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: GestureDetector(
-                  onTap: () {
-                    controller.resumeCamera();
-                  },
-                  child: QRView(
-                    overlay: QrScannerOverlayShape(
-                      borderRadius: 10,
-                      borderColor: Colors.white,
-                      borderWidth: 5,
-                    ),
-                    key: qrKey,
-                    onQRViewCreated: _onQRViewCreated,
+          ),
+          SizedBox(
+            height: context.height * 70,
+            width: context.width * 80,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: GestureDetector(
+                onTap: () {
+                  controller.resumeCamera();
+                },
+                child: QRView(
+                  overlay: QrScannerOverlayShape(
+                    borderRadius: 10,
+                    borderColor: Colors.white,
+                    borderWidth: 5,
                   ),
+                  key: qrKey,
+                  onQRViewCreated: _onQRViewCreated,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -87,15 +79,12 @@ class _QRPageState extends State<QRPage> {
       setState(() {
         if (scanData != null) {
           controller.pauseCamera();
-          locator.get<HomeViewModel>().filterCities(scanData.code);
+          locator.get<HomeViewModel>().qrTextEditingController.text =
+              scanData.code!;
           locator.get<HomeViewModel>().getQrText(scanData.code!);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => const HomeView()));
+          locator.get<HomeViewModel>().filterCities(scanData.code);
+          locator.get<HomeViewModel>().setHomeView(0);
           log(scanData.code!);
-          // locator.get<HomeViewModel>().getQrText("");
-          // link: scanData.code
           controller.stopCamera();
         }
       });

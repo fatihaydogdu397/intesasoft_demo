@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:intesasoft_demo/app/constants/app_constants.dart';
 import 'package:intesasoft_demo/app/enums/viewstate.dart';
 import 'package:intesasoft_demo/app/init/network/network_manager.dart';
@@ -13,6 +14,7 @@ class HomeViewModel extends BaseModel {
   String get cityId => _cityId;
   String _qrText = '';
   String get qrText => _qrText;
+  TextEditingController qrTextEditingController = TextEditingController();
 
   void changeCityId(String i) {
     _cityId = i;
@@ -21,6 +23,14 @@ class HomeViewModel extends BaseModel {
 
   void getQrText(String i) {
     _qrText = i;
+    notifyListeners();
+  }
+
+  int _homeView = 0;
+  int get homeView => _homeView;
+
+  setHomeView(int i) {
+    _homeView = i;
     notifyListeners();
   }
 

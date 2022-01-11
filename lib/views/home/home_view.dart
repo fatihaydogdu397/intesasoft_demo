@@ -13,6 +13,7 @@ import 'package:intesasoft_demo/views/detail/detail_view.dart';
 import 'package:intesasoft_demo/views/qr/qr_view.dart';
 import 'package:provider/provider.dart';
 
+import '../../locator.dart';
 import 'home_viewmodel.dart';
 
 Future<void> nextTick(Function callback, [int milliseconds = 0]) async {
@@ -22,20 +23,23 @@ Future<void> nextTick(Function callback, [int milliseconds = 0]) async {
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+  final bool? dontReq;
+  const HomeView({Key? key, this.dontReq}) : super(key: key);
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  TextEditingController qrTextEditingController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return BaseView<HomeViewModel>(
       onModelReady: (HomeViewModel model) {
-        model.getCityList();
+        if (widget.dontReq == true) {
+          model.filterCities(model.qrTextEditingController.text);
+        } else {
+          model.getCityList();
+        }
       },
       builder: (context, model, child) => Scaffold(
         backgroundColor: context.primaryColor,
@@ -53,27 +57,29 @@ class _HomeViewState extends State<HomeView> {
         child: CustomAppbar(),
       ),
       drawer: const CustomDrawer(),
-      body: Consumer<HomeViewModel>(builder: (context, provider, _) {
-        return Padding(
-          padding: context.highEdgeInsets,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: context.highCircular,
-              color: backgroundWhiteColor,
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: context.mediumEdgeInsets,
-                  child: searchBar(model, context),
+      body: model.homeView == 0
+          ? Consumer<HomeViewModel>(builder: (context, provider, _) {
+              return Padding(
+                padding: context.highEdgeInsets,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: context.highCircular,
+                    color: backgroundWhiteColor,
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: context.mediumEdgeInsets,
+                        child: searchBar(model, context),
+                      ),
+                      subHeader(context),
+                      cityList(model)
+                    ],
+                  ),
                 ),
-                subHeader(context),
-                cityList(model)
-              ],
-            ),
-          ),
-        );
-      }),
+              );
+            })
+          : QRPage(),
     );
   }
 
@@ -82,25 +88,23 @@ class _HomeViewState extends State<HomeView> {
       children: [
         Expanded(
             child: SearchBar(
-          textEditingController: qrTextEditingController,
+          textEditingController:
+              locator.get<HomeViewModel>().qrTextEditingController,
           onChanged: (value) {
             model.filterCities(value);
             // model.getQrText(value);
           },
           hintTextKey: 'Şehir Giriniz',
         )),
-        qrButton(context)
+        qrButton(model, context)
       ],
     );
   }
 
-  Widget qrButton(BuildContext context) {
+  Widget qrButton(HomeViewModel model, BuildContext context) {
     return IconButton(
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => const QRPage()));
+          model.setHomeView(1);
         },
         icon: const Icon(Icons.qr_code_scanner, size: 30));
   }
@@ -162,7 +166,7 @@ class _HomeViewState extends State<HomeView> {
                           fallbackWidth: 80,
                         )
                       : Image(
-                          image: NetworkImage(model.res[index].image),
+                          image: NetworkImage(model.filteredList[index].image),
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
